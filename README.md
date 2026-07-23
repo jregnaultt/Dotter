@@ -1,0 +1,2 @@
+# Dotter
+Generador de Sprite
