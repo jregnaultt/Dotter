@@ -92,6 +92,15 @@ async def generate_sprites_from_uploaded_photo(
     with open(upload_path, "wb") as buffer:
         shutil.copyfileobj(image_file.file, buffer)
 
+    # Análisis de visión con Groq AI
+    vision_features = GroqPromptService.analyze_image_file(
+        image_path=upload_path,
+        style_preference=style_preference,
+        groq_api_key=groq_api_key
+    )
+    if vision_features:
+        description = f"{description or 'Luchador'}. Visual features from photo: {vision_features}"
+
     target_model = pollinations_model or settings.POLLINATIONS_MODEL
     key = api_key or settings.POLLINATIONS_API_KEY
     
@@ -107,13 +116,22 @@ async def generate_sprites_from_uploaded_photo(
         SpriteState.FATALITY,
     ]
 
-    # Ejecución paralela inmediata
-    tasks = [
-        asyncio.to_thread(_process_single_state, state, description, character_name, target_model, key, style_preference, None, groq_api_key)
-        for state in states
-    ]
-    
-    generated_frames = list(await asyncio.gather(*tasks))
+    # Ejecución secuencial ultra estable para garantizar que el 100% de los 9 sprites se descarguen sin errores de red
+    generated_frames = []
+    for state in states:
+        frame_info = await asyncio.to_thread(
+            _process_single_state,
+            state,
+            description,
+            character_name,
+            target_model,
+            key,
+            style_preference,
+            None,
+            groq_api_key
+        )
+        generated_frames.append(frame_info)
+        await asyncio.sleep(0.5)
 
     state_order = {s: i for i, s in enumerate(states)}
     generated_frames.sort(key=lambda f: state_order.get(f.state, 99))

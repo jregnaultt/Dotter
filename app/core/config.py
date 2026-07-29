@@ -13,7 +13,7 @@ class Settings(BaseModel):
     API_V1_STR: str = "/api/v1"
     
     POLLINATIONS_API_KEY: str = os.getenv("POLLINATIONS_API_KEY", "")
-    POLLINATIONS_MODEL: str = os.getenv("POLLINATIONS_MODEL", "flux")
+    POLLINATIONS_MODEL: str = os.getenv("POLLINATIONS_MODEL", "kontext")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     
     OUTPUT_DIR: str = os.getenv("OUTPUT_DIR", "output_sprites")
